@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CrownDash — Demo</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+@media (max-width: 480px) { body { padding: 0; background: #ffffff; } }
+
+.frame {
+  max-width: 440px;
+  margin: 0 auto;
+  background: #ffffff;
+  min-height: calc(100vh - 40px);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+@media (max-width: 480px) { .frame { border-radius: 0; min-height: 100vh; box-shadow: none; } }
+
+.header {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid #f3f4f6;
+  padding: 14px 18px 12px;
+}
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.logo-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(16,185,129,0.25); }
+.header-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn { width: 36px; height: 36px; border-radius: 10px; border: 0; background: #f3f4f6; color: #374151; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background .15s; }
+.icon-btn:hover { background: #e5e7eb; }
+.icon-btn .dot-alert { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #f3f4f6; }
+
+.content { flex: 1; padding: 12px 16px 110px; }
+.section-title { font-size: 24px; font-weight: 700; letter-spacing: -0.03em; margin: 10px 0 4px; }
+.section-sub { font-size: 13px; color: #6b7280; margin: 0 0 14px; }
+
+.pills { display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 14px; margin: 0 -16px; scrollbar-width: none; }
+.pills::-webkit-scrollbar { display: none; }
+.pill { flex: 0 0 auto; border: 1px solid #e5e7eb; background: #ffffff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; transition: all .15s; font-family: inherit; }
+.pill:hover { border-color: #10b981; color: #065f46; }
+.pill.active { background: #10b981; color: #ffffff; border-color: #10b981; }
+
+.card { background: #ffffff; border: 1px solid #f3f4f6; border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); cursor: pointer; transition: transform .12s, box-shadow .15s, border-color .15s; animation: fadeIn .3s ease; }
+.card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-color: #e5e7eb; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.card-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; margin-bottom: 8px; }
+.card-title { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; margin: 0; line-height: 1.3; }
+.card-meta { display: flex; gap: 10px; color: #6b7280; font-size: 12px; flex-wrap: wrap; align-items: center; }
+.card-meta .mdot { width: 3px; height: 3px; border-radius: 50%; background: #d1d5db; }
+.meta-icon { display: inline-flex; align-items: center; gap: 3px; }
+.price-tag { background: #d1fae5; color: #065f46; font-weight: 700; font-size: 14px; padding: 6px 12px; border-radius: 10px; white-space: nowrap; }
+.price-tag.offer { background: #fef3c7; color: #92400e; }
+
+.card-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.poster { display: flex; align-items: center; gap: 8px; color: #374151; font-size: 13px; min-width: 0; }
+.poster-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.poster-rating { color: #6b7280; font-size: 12px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px; color: #fff; flex-shrink: 0; letter-spacing: 0.02em; }
+.avatar.lg { width: 72px; height: 72px; font-size: 26px; }
+.avatar.md { width: 44px; height: 44px; font-size: 15px; }
+.badge-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+.badge-chip.lg { padding: 5px 11px; font-size: 11px; }
+.badge-new { background: #fef3c7; color: #92400e; }
+.badge-verified { background: #dbeafe; color: #1e40af; }
+.badge-trusted { background: #d1fae5; color: #065f46; }
+.badge-top { background: #ede9fe; color: #5b21b6; }
+
+.cat-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #374151; background: #f3f4f6; padding: 4px 9px; border-radius: 8px; letter-spacing: 0.01em; }
+
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+.status.open { background: #d1fae5; color: #065f46; }
+.status.accepted { background: #dbeafe; color: #1e40af; }
+.status.progress { background: #fed7aa; color: #9a3412; }
+.status.awaiting { background: #fce7f3; color: #9f1239; }
+.status.completed_both { background: #e0e7ff; color: #3730a3; }
+.status.closed { background: #f3f4f6; color: #6b7280; }
+
+.btn { border: 0; cursor: pointer; padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 600; font-family: inherit; transition: transform .08s, box-shadow .15s, background .15s, color .15s; }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: #10b981; color: #ffffff; width: 100%; box-shadow: 0 2px 6px rgba(16,185,129,0.25); }
+.btn-primary:hover { background: #059669; box-shadow: 0 4px 10px rgba(16,185,129,0.3); }
+.btn-primary:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
+.btn-outline { background: #ffffff; border: 1px solid #e5e7eb; color: #111827; width: 100%; }
+.btn-outline:hover { background: #f9fafb; border-color: #d1d5db; }
+.btn-ghost { background: transparent; color: #10b981; padding: 10px 14px; }
+.btn-ghost:hover { background: #d1fae5; }
+.btn-danger { background: #ffffff; border: 1px solid #fecaca; color: #b91c1c; width: 100%; }
+.btn-danger:hover { background: #fef2f2; }
+.btn-sm { padding: 9px 14px; font-size: 13px; width: auto; }
+.btn-row { display: flex; gap: 8px; }
+
+.field { margin-bottom: 14px; }
+.label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.input, .textarea, .select { width: 100%; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px; font-size: 15px; font-family: inherit; background: #ffffff; color: #111827; transition: border-color .15s, box-shadow .15s; }
+.input:focus, .textarea:focus, .select:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+.textarea { min-height: 90px; resize: vertical; }
+.help { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+.check-box { display: flex; gap: 10px; align-items: start; padding: 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; transition: background .15s; }
+.check-box:hover { background: #fef3c7; }
+.check-box input { margin-top: 2px; accent-color: #10b981; width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+.check-box .text { font-size: 12px; color: #713f12; line-height: 1.5; }
+.check-box .text strong { color: #78350f; }
+
+.seg { display: flex; background: #f3f4f6; border-radius: 12px; padding: 3px; gap: 2px; }
+.seg button { flex: 1; border: 0; background: transparent; padding: 10px; font-size: 14px; font-weight: 600; color: #6b7280; border-radius: 10px; cursor: pointer; font-family: inherit; transition: all .15s; }
+.seg button.active { background: #ffffff; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.chat { display: flex; flex-direction: column; gap: 6px; padding: 14px 2px; max-height: 340px; overflow-y: auto; }
+.msg-wrap { display: flex; flex-direction: column; }
+.msg-wrap.me { align-items: flex-end; }
+.msg-wrap.them { align-items: flex-start; }
+.msg { max-width: 78%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+.msg.me { background: #10b981; color: #fff; border-bottom-right-radius: 4px; }
+.msg.them { background: #f3f4f6; color: #111827; border-bottom-left-radius: 4px; }
+.msg.loc { background: #ede9fe; color: #5b21b6; font-weight: 600; }
+.msg-meta { font-size: 10px; color: #9ca3af; margin: 2px 6px 0; }
+.chat-input { display: flex; gap: 8px; padding: 10px 0 0; border-top: 1px solid #f3f4f6; margin-top: 6px; align-items: center; }
+.chat-input input { flex: 1; border: 1px solid #e5e7eb; border-radius: 999px; padding: 10px 16px; font-size: 14px; font-family: inherit; }
+.chat-input input:focus { outline: none; border-color: #10b981; }
+.chat-actions { display: flex; gap: 6px; padding: 0 0 8px; }
+.chat-action-btn { border: 1px solid #e5e7eb; background: #fff; padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; font-family: inherit; color: #374151; display: inline-flex; align-items: center; gap: 4px; }
+.chat-action-btn:hover { background: #f9fafb; }
+.send-btn { border: 0; background: #10b981; color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; }
+.send-btn:hover { background: #059669; }
+
+.nav { position: sticky; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid #f3f4f6; display: flex; justify-content: space-around; padding: 8px 0 calc(env(safe-area-inset-bottom) + 8px); }
+.nav button { border: 0; background: transparent; padding: 6px 10px; color: #9ca3af; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; font-family: inherit; position: relative; border-radius: 8px; transition: color .15s; }
+.nav button.active { color: #10b981; }
+.nav button:hover { color: #059669; }
+.nav .dot-alert { position: absolute; top: 4px; right: 6px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; }
+.post-fab { background: #10b981 !important; color: #fff !important; width: 54px; height: 54px; border-radius: 50%; margin-top: -20px; box-shadow: 0 4px 14px rgba(16,185,129,0.4); display: flex !important; flex-direction: column; align-items: center; justify-content: center; font-size: 10px !important; gap: 0 !important; }
+.post-fab:hover { background: #059669 !important; color: #fff !important; }
+
+.detail-hero { padding: 4px 0 16px; border-bottom: 1px solid #f3f4f6; margin-bottom: 4px; }
+.back-btn { background: transparent; border: 0; padding: 8px 0; color: #10b981; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-family: inherit; }
+.back-btn:hover { color: #059669; }
+.detail-title { font-size: 24px; font-weight: 700; letter-spacing: -0.025em; margin: 8px 0 8px; line-height: 1.2; }
+.detail-meta { display: flex; gap: 10px; color: #6b7280; font-size: 13px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+.stat-row:last-child { border-bottom: 0; }
+.stat-label { color: #6b7280; font-size: 14px; }
+.stat-value { font-weight: 600; color: #111827; }
+.desc-text { font-size: 14px; color: #374151; line-height: 1.5; padding: 12px 0; border-bottom: 1px solid #f3f4f6; white-space: pre-wrap; }
+.subhead { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin: 18px 0 10px; }
+
+.stars { display: inline-flex; gap: 2px; vertical-align: middle; }
+.stars .star { width: 14px; height: 14px; color: #d1d5db; }
+.stars .star.filled { color: #fbbf24; }
+.stars.lg .star { width: 32px; height: 32px; cursor: pointer; transition: transform .1s; }
+.stars.lg .star:hover { transform: scale(1.15); }
+.stars.md .star { width: 18px; height: 18px; }
+
+.tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+.tag-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; color: #374151; font-family: inherit; }
+.tag-chip:hover { border-color: #10b981; }
+.tag-chip.selected { background: #d1fae5; border-color: #10b981; color: #065f46; }
+
+.bool-switch { display: flex; gap: 8px; }
+.bool-switch button { flex: 1; border: 1px solid #e5e7eb; background: #fff; padding: 10px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; color: #374151; font-family: inherit; transition: all .15s; }
+.bool-switch button.yes.active { background: #d1fae5; border-color: #10b981; color: #065f46; }
+.bool-switch button.no.active { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.5); z-index: 50; display: flex; align-items: flex-end; justify-content: center; animation: fadeIn .2s ease; padding: 0; }
+@media (min-width: 481px) { .modal-backdrop { align-items: center; } }
+.modal { background: #ffffff; width: 100%; max-width: 440px; border-radius: 20px 20px 0 0; padding: 20px 20px 28px; animation: slideUp .25s ease; max-height: 92vh; overflow-y: auto; }
+@media (min-width: 481px) { .modal { border-radius: 20px; max-height: 86vh; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+.modal-sub { font-size: 14px; color: #6b7280; margin: 0 0 18px; }
+
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; z-index: 100; animation: fadeIn .2s ease; max-width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+
+.profile-header { text-align: center; padding: 12px 0 8px; }
+.profile-name { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 10px 0 2px; }
+.profile-joined { font-size: 12px; color: #9ca3af; margin: 2px 0 6px; }
+.profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 20px; padding: 16px 0; background: #f9fafb; border-radius: 14px; }
+.profile-stats .stat { text-align: center; }
+.profile-stats .big { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.profile-stats .lab { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-top: 2px; }
+
+.empty { text-align: center; padding: 70px 20px; color: #9ca3af; }
+.empty svg { margin-bottom: 14px; opacity: 0.4; }
+.empty .em-title { font-size: 16px; font-weight: 600; color: #6b7280; margin-bottom: 6px; }
+.empty .em-sub { font-size: 13px; line-height: 1.5; }
+
+.tabs { display: flex; background: #f3f4f6; border-radius: 12px; padding: 3px; gap: 2px; margin-bottom: 14px; }
+.tabs button { flex: 1; border: 0; background: transparent; padding: 10px; font-size: 13px; font-weight: 600; color: #6b7280; border-radius: 10px; cursor: pointer; font-family: inherit; transition: all .15s; }
+.tabs button.active { background: #ffffff; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.fee-box { background: #f9fafb; border-radius: 12px; padding: 14px; margin-top: 10px; font-size: 13px; }
+.fee-row { display: flex; justify-content: space-between; padding: 4px 0; color: #6b7280; }
+.fee-row.total { font-weight: 700; color: #111827; border-top: 1px solid #e5e7eb; padding-top: 10px; margin-top: 6px; }
+
+.review-card { padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+.review-card:last-child { border-bottom: 0; }
+.review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.review-name { font-size: 14px; font-weight: 600; }
+.review-date { font-size: 11px; color: #9ca3af; }
+.review-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.review-tag { font-size: 11px; padding: 2px 8px; background: #f3f4f6; color: #374151; border-radius: 999px; font-weight: 500; }
+.review-text { font-size: 13px; color: #374151; line-height: 1.5; margin-top: 4px; }
+
+.offer-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f9fafb; border-radius: 10px; margin-bottom: 6px; }
+.offer-card .offer-who { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.offer-card .offer-amt { font-weight: 700; color: #065f46; }
+
+.alert-banner { background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 12px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #713f12; margin-bottom: 14px; line-height: 1.5; }
+.alert-banner.info { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+.alert-banner.success { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+
+.info-line { font-size: 12px; color: #6b7280; line-height: 1.5; padding: 8px 12px; background: #f9fafb; border-radius: 8px; margin: 10px 0; }
+
+.notif-item { display: flex; gap: 12px; padding: 14px 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .15s; border-radius: 10px; }
+.notif-item:hover { background: #f9fafb; }
+.notif-item:last-child { border-bottom: 0; }
+.notif-icon { width: 40px; height: 40px; border-radius: 50%; background: #d1fae5; color: #065f46; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-title { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.notif-sub { font-size: 12px; color: #6b7280; line-height: 1.4; }
+.notif-time { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+
+.inbox-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .15s; }
+.inbox-item:hover { background: #f9fafb; margin: 0 -16px; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; }
+.inbox-body { flex: 1; min-width: 0; }
+.inbox-name { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.inbox-preview { font-size: 13px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox-time { font-size: 11px; color: #9ca3af; }
+
+hr.soft { border: 0; border-top: 1px solid #f3f4f6; margin: 16px 0; }
+</style>
+</head>
+<body>
+<div id="app" class="frame"></div>
+<script>
+(() => {
+  const I = {
+    crown: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 17h14l1.5-8.5-4.5 2.5-3.5-5-3.5 5L4.5 8.5 6 17zm-1 2h16v2H4v-2z"/></svg>',
+    search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+    bell: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+    home: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/></svg>',
+    plus: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    briefcase: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    chat: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    user: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    pin: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.6"/></svg>',
+    clock: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    star: '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.77 5.82 21l1.18-6.87-5-4.87 6.91-1z"/></svg>',
+    back: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    send: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>',
+    image: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+    locShare: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    shield: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    flag: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4s2-2 5-2 4 2 7 2 4-1 4-1v12s-2 1-4 1-4-2-7-2-5 2-5 2"/></svg>',
+    inbox: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.5 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.5A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.74 1.5z"/></svg>',
+  };
+  const starRow = (n) => `<span class="stars">${Array.from({length:5},(_,i)=>I.star.replace('class="star"', `class="star${i<Math.round(n)?' filled':''}"`)).join('')}</span>`;
+  const starRowMd = (n) => `<span class="stars md">${Array.from({length:5},(_,i)=>I.star.replace('class="star"', `class="star${i<Math.round(n)?' filled':''}"`)).join('')}</span>`;
+
+  const AVATAR_COLORS = ['#f59e0b','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#ef4444','#6366f1','#10b981'];
+  const CATEGORIES = ['Errands & Delivery','Home Repair','Babysitting / Childcare','Cleaning','Moving Help','Tech Help','Yard Work','Personal Assistant','Other'];
+  const HELPER_TAGS = ['On time','Good communication','Careful','Professional'];
+  const CLIENT_TAGS = ['Clear instructions','Paid fairly','Easy to work with'];
+
+  const now = Date.now();
+  const hoursAgo = (h) => now - h*60*60*1000;
+  const minsAgo = (m) => now - m*60*1000;
+
+  const state = {
+    currentUserId: 'u1', screen: 'browse', selectedTaskId: null,
+    myJobsTab: 'accepted', browseFilter: 'All', profileUserId: null,
+    modal: null, toast: null,
+    users: {
+      u1: { id:'u1', name:'Alex Rivera', colorIdx:0, verified:true, jobsCompleted:14, ratingSum:67.2, ratingCount:14, categories:['Home Repair','Moving Help','Errands & Delivery'], joined:'Mar 2025', bio:'Detail-oriented & fast. Available evenings & weekends.',
+        reviewsReceived:[
+          { fromId:'u4', fromName:'Priya S.', role:'requester', rating:5, tags:['On time','Careful'], text:'Assembled everything perfectly.', at:hoursAgo(26) },
+          { fromId:'u2', fromName:'Maya C.', role:'requester', rating:5, tags:['Good communication','Professional'], text:'Kids loved Alex.', at:hoursAgo(60) },
+          { fromId:'u5', fromName:'Marcus J.', role:'requester', rating:4, tags:['On time'], text:'Solid help with the boxes.', at:hoursAgo(120) },
+        ]},
+      u2: { id:'u2', name:'Maya Chen', colorIdx:1, verified:true, jobsCompleted:8, ratingSum:40, ratingCount:8, categories:['Cleaning'], joined:'Jan 2025', bio:'Looking for help with household tasks.',
+        reviewsReceived:[{ fromId:'u1', fromName:'Alex R.', role:'helper', rating:5, tags:['Clear instructions','Paid fairly'], text:'Great client.', at:hoursAgo(60) }]},
+      u3: { id:'u3', name:'Jordan Lee', colorIdx:2, verified:true, jobsCompleted:42, ratingSum:205.8, ratingCount:42, categories:['Moving Help','Home Repair'], joined:'Oct 2024', bio:'Licensed handyman, 8+ years experience.',
+        reviewsReceived:[{ fromId:'u2', fromName:'Maya C.', role:'requester', rating:5, tags:['Professional','Careful'], text:'Excellent work.', at:hoursAgo(48) }]},
+      u4: { id:'u4', name:'Priya Singh', colorIdx:3, verified:true, jobsCompleted:7, ratingSum:32.5, ratingCount:7, categories:['Tech Help','Personal Assistant'], joined:'Feb 2026', bio:'Tech-savvy & organized.', reviewsReceived:[]},
+      u5: { id:'u5', name:'Marcus Johnson', colorIdx:4, verified:false, jobsCompleted:0, ratingSum:0, ratingCount:0, categories:['Yard Work'], joined:'Apr 2026', bio:'New to the platform — eager to help.', reviewsReceived:[]},
+    },
+    tasks: [
+      { id:'t1', title:'Pick up dry cleaning from Rainbow Cleaners', description:'Pickup ticket #4423. They close at 7pm. Cash or card both fine — I\'ll reimburse. Drop at lobby of 2400 Mission St, the doorman will take it.', category:'Errands & Delivery', location:'Mission District, SF', distance:2.1, priceType:'fixed', price:25, status:'open', requesterId:'u2', helperId:null, createdAt: minsAgo(18), messages:[], liabilityAgreed:true, offers:[], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null },
+      { id:'t2', title:'Fix leaky kitchen faucet', description:'Been dripping for 2 weeks. Probably a worn washer. Happy to provide parts or reimburse up to $30. Need this done this week.', category:'Home Repair', location:'Noe Valley, SF', distance:3.4, priceType:'offer', price:null, status:'open', requesterId:'u2', helperId:null, createdAt: hoursAgo(2), messages:[], liabilityAgreed:true, offers:[{ helperId:'u3', amount:75 }, { helperId:'u4', amount:60 }], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null },
+      { id:'t3', title:'Help move a couch up 2 flights', description:'Couch is heavy-ish — needs a 2-person lift. Apartment is a 3rd-floor walkup. Should take 20 min tops.', category:'Moving Help', location:'Dogpatch, SF', distance:4.2, priceType:'fixed', price:80, status:'in_progress', requesterId:'u1', helperId:'u3', createdAt: hoursAgo(3), messages:[{ fromId:'u3', text:'Heading over now, should be there in 10.', at: minsAgo(40) },{ fromId:'u1', text:'Great! Buzzer is #305.', at: minsAgo(38) },{ fromId:'u3', text:'Arrived. Coming up.', at: minsAgo(5) }], liabilityAgreed:true, offers:[], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null },
+      { id:'t4', title:'Assemble IKEA desk (Bekant)', description:'Desk is still in the box. All parts there. Should take under an hour.', category:'Home Repair', location:'SOMA, SF', distance:1.8, priceType:'fixed', price:60, status:'accepted', requesterId:'u4', helperId:'u1', createdAt: hoursAgo(1), messages:[{ fromId:'u4', text:'Thanks for picking this up! Apartment is 14B.', at: minsAgo(30) }], liabilityAgreed:true, offers:[], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null },
+      { id:'t5', title:'Evening babysitting — 2 kids, 3 hours', description:'Kids are 4 and 7. Already fed, mostly need to manage bedtime at 8:30pm. Calm household.', category:'Babysitting / Childcare', location:'Bernal Heights, SF', distance:5.1, priceType:'fixed', price:90, status:'completed_both', requesterId:'u2', helperId:'u1', createdAt: hoursAgo(24), messages:[{ fromId:'u2', text:'Door code is 4421. See you at 6!', at: hoursAgo(22) },{ fromId:'u1', text:'All went well — kids are down. House is locked up.', at: hoursAgo(18) },{ fromId:'u2', text:'Amazing, thank you so much!', at: hoursAgo(17) }], liabilityAgreed:true, offers:[], requesterConfirmed:true, helperConfirmed:true, requesterReview:null, helperReview:null },
+      { id:'t6', title:'Mow small front lawn', description:'About 400 sq ft. I have the mower, just need someone to push it around. First time hiring on here!', category:'Yard Work', location:'Outer Sunset, SF', distance:6.8, priceType:'fixed', price:40, status:'open', requesterId:'u5', helperId:null, createdAt: minsAgo(45), messages:[], liabilityAgreed:true, offers:[], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null },
+      { id:'t7', title:'Walk my dog for 30 min', description:'Friendly golden retriever named Basil. Easy walk around the block.', category:'Errands & Delivery', location:'Mission District, SF', distance:0.5, priceType:'fixed', price:20, status:'closed', requesterId:'u1', helperId:'u4', createdAt: hoursAgo(48), messages:[], liabilityAgreed:true, offers:[], requesterConfirmed:true, helperConfirmed:true,
+        requesterReview:{ rating:5, tags:['On time','Careful','Good communication'], wouldAgain:true, text:'Basil loved her. Perfect walk.', at: hoursAgo(47), fromId:'u1' },
+        helperReview:{ rating:5, tags:['Clear instructions','Paid fairly'], wouldAgain:true, text:'Super easy — great dog.', at: hoursAgo(47), fromId:'u4' } },
+    ],
+  };
+  let nextTaskId = 100;
+
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const esc = (s) => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const me = () => state.users[state.currentUserId];
+  const user = (id) => state.users[id];
+  const task = (id) => state.tasks.find(t => t.id === id);
+  function avgRating(u){ return u.ratingCount ? (u.ratingSum / u.ratingCount) : 0; }
+  function avatarBg(u){ return AVATAR_COLORS[u.colorIdx % AVATAR_COLORS.length]; }
+  function avatarInitials(u){ return u.name.split(' ').map(s=>s[0]).slice(0,2).join(''); }
+  function avatarHTML(u, size='sm'){
+    const cls = size==='lg'?'avatar lg': size==='md'?'avatar md':'avatar';
+    return `<span class="${cls}" style="background:${avatarBg(u)}">${esc(avatarInitials(u))}</span>`;
+  }
+  function computeBadge(u){
+    const r = avgRating(u); const j = u.jobsCompleted;
+    if (r >= 4.8 && j >= 30) return { name:'Top Rated', cls:'badge-top' };
+    if (r >= 4.7 && j >= 10) return { name:'Trusted', cls:'badge-trusted' };
+    if (u.verified || j >= 5) return { name:'Verified', cls:'badge-verified' };
+    return { name:'New', cls:'badge-new' };
+  }
+  function badgeHTML(u, size=''){
+    const b = computeBadge(u);
+    return `<span class="badge-chip ${b.cls}${size==='lg'?' lg':''}">${esc(b.name)}</span>`;
+  }
+  function formatRel(t){
+    const d = Date.now() - t;
+    if (d < 60*1000) return 'just now';
+    if (d < 60*60*1000) return Math.floor(d/60000)+'m ago';
+    if (d < 24*60*60*1000) return Math.floor(d/3600000)+'h ago';
+    return Math.floor(d/86400000)+'d ago';
+  }
+  function statusLabel(s){ return ({open:'Open', accepted:'Accepted', in_progress:'In Progress', awaiting_confirmation:'Awaiting', completed_both:'Completed', closed:'Closed'})[s] || s; }
+  function statusCls(s){ return ({open:'open', accepted:'accepted', in_progress:'progress', awaiting_confirmation:'awaiting', completed_both:'completed_both', closed:'closed'})[s] || 'open'; }
+  function platformFee(price){ return Math.round(price * 0.10 * 100) / 100; }
+  function helperPayout(price){ return Math.round(price * 0.90 * 100) / 100; }
+
+  function notifications() {
+    const out = [];
+    for (const t of state.tasks) {
+      if (t.status === 'completed_both') {
+        if (t.requesterId === state.currentUserId && !t.requesterReview) out.push({ taskId:t.id, text:`Review your helper for "${t.title}"`, time:formatRel(t.createdAt), icon:I.star });
+        if (t.helperId === state.currentUserId && !t.helperReview) out.push({ taskId:t.id, text:`Review your client for "${t.title}"`, time:formatRel(t.createdAt), icon:I.star });
+      }
+      if (t.status === 'accepted' && t.helperId === state.currentUserId && t.messages.length) {
+        const last = t.messages[t.messages.length-1];
+        if (last.fromId !== state.currentUserId) out.push({ taskId:t.id, text:`New message from ${user(t.requesterId).name.split(' ')[0]}`, time:formatRel(last.at), icon:I.chat });
+      }
+    }
+    const open = state.tasks.filter(t => t.status==='open' && t.requesterId !== state.currentUserId);
+    if (open.length) out.push({ text:`${open.length} new jobs near you`, time:'now', icon:I.bell });
+    return out;
+  }
+
+  function hasAlerts(){
+    return state.tasks.some(t => {
+      if (t.status === 'completed_both') {
+        if (t.requesterId === state.currentUserId && !t.requesterReview) return true;
+        if (t.helperId === state.currentUserId && !t.helperReview) return true;
+      }
+      return false;
+    });
+  }
+
+  function toast(msg){
+    state.toast = msg; render();
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>{ state.toast = null; render(); }, 2200);
+  }
+  function acceptTask(id){
+    const t = task(id); if (!t || t.status !== 'open') return;
+    if (t.requesterId === state.currentUserId) { toast('You can\'t accept your own task.'); return; }
+    t.status = 'accepted'; t.helperId = state.currentUserId;
+    toast('Task accepted — chat is now unlocked.'); render();
+  }
+  function startTask(id){ const t = task(id); if (!t) return; t.status = 'in_progress'; toast('Job marked in progress.'); render(); }
+  function markCompleteBy(id, roleKey){
+    const t = task(id); if (!t) return;
+    if (roleKey === 'requester') t.requesterConfirmed = true;
+    if (roleKey === 'helper') t.helperConfirmed = true;
+    if (t.requesterConfirmed && t.helperConfirmed) { t.status = 'completed_both'; toast('Both sides confirmed. Reviews are unlocked.'); }
+    else { t.status = 'awaiting_confirmation'; toast('Marked done — waiting for the other side to confirm.'); }
+    render();
+  }
+  function submitReview(id, roleKey, payload){
+    const t = task(id); if (!t) return;
+    const review = { ...payload, at: Date.now(), fromId: state.currentUserId };
+    if (roleKey === 'requester') {
+      t.requesterReview = review;
+      const helper = user(t.helperId);
+      helper.ratingSum += payload.rating; helper.ratingCount += 1; helper.jobsCompleted += 1;
+      helper.reviewsReceived.unshift({ fromId: state.currentUserId, fromName: me().name.split(' ')[0]+' '+(me().name.split(' ')[1]||'')[0]+'.', role: 'requester', rating: payload.rating, tags: payload.tags, text: payload.text, at: review.at });
+    } else {
+      t.helperReview = review;
+      const requester = user(t.requesterId);
+      requester.ratingSum += payload.rating; requester.ratingCount += 1;
+      requester.reviewsReceived.unshift({ fromId: state.currentUserId, fromName: me().name.split(' ')[0]+' '+(me().name.split(' ')[1]||'')[0]+'.', role: 'helper', rating: payload.rating, tags: payload.tags, text: payload.text, at: review.at });
+    }
+    if (t.requesterReview && t.helperReview) t.status = 'closed';
+    state.modal = null; toast('Review submitted.'); render();
+  }
+  function sendMsg(id, text, type){ const t = task(id); if (!t || !text.trim()) return; t.messages.push({ fromId: state.currentUserId, text: text.trim(), at: Date.now(), type }); render(); }
+  function raisePrice(id, amt){ const t = task(id); if (!t || t.status !== 'open') return; t.price = amt; t.priceType = 'fixed'; state.modal = null; toast(`Price raised to $${amt}. Helpers will be notified.`); render(); }
+  function postTask(data){
+    const id = 't' + (nextTaskId++);
+    const t = { id, title:data.title, description:data.description, category:data.category, location:data.location, distance:+(Math.random()*6+0.4).toFixed(1), priceType:data.priceType, price:data.priceType==='fixed'?+data.price:null, status:'open', requesterId:state.currentUserId, helperId:null, createdAt:Date.now(), messages:[], liabilityAgreed:true, offers:[], requesterConfirmed:false, helperConfirmed:false, requesterReview:null, helperReview:null };
+    state.tasks.unshift(t);
+    state.screen = 'jobs'; state.myJobsTab = 'posted';
+    toast('Task posted — nearby helpers notified.'); render();
+  }
+  function acceptOffer(taskId, helperId, amount){ const t = task(taskId); if (!t) return; t.price = amount; t.priceType = 'fixed'; t.helperId = helperId; t.status = 'accepted'; t.offers = []; toast(`Offer accepted from ${user(helperId).name.split(' ')[0]}.`); render(); }
+
+  function render(){ const root = $('#app'); root.innerHTML = renderHeader() + renderContent() + renderNav() + renderModal() + renderToast(); wire(root); }
+
+  function renderHeader(){
+    return `
+      <div class="header">
+        <div class="brand">
+          <div class="logo"><span class="logo-mark">${I.crown}</span><span>CrownDash</span></div>
+          <div class="header-actions">
+            <button class="icon-btn" data-action="nav" data-screen="inbox" aria-label="Messages">${I.chat.replace('width="22" height="22"','width="18" height="18"')}${state.tasks.some(t=>t.status==='accepted'&&t.helperId===state.currentUserId)?'<span class="dot-alert"></span>':''}</button>
+            <button class="icon-btn" data-action="toggle-notif" aria-label="Notifications">${I.bell}${hasAlerts()?'<span class="dot-alert"></span>':''}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderContent(){
+    let body = '';
+    if (state.screen === 'detail' && state.selectedTaskId) body = renderDetail(task(state.selectedTaskId));
+    else if (state.screen === 'browse') body = renderBrowse();
+    else if (state.screen === 'post') body = renderPost();
+    else if (state.screen === 'jobs') body = renderMyJobs();
+    else if (state.screen === 'inbox') body = renderInbox();
+    else if (state.screen === 'profile') body = renderProfile();
+    return `<div class="content">${body}</div>`;
+  }
+
+  function renderBrowse(){
+    const openTasks = state.tasks.filter(t => t.status === 'open' && t.requesterId !== state.currentUserId);
+    const filtered = state.browseFilter === 'All' ? openTasks : openTasks.filter(t => t.category === state.browseFilter);
+    const cats = ['All', ...CATEGORIES];
+    return `
+      <div class="section-title">Jobs near you</div>
+      <div class="section-sub">${openTasks.length} open tasks within 10 mi</div>
+      <div class="pills">${cats.map(c => `<button class="pill${c===state.browseFilter?' active':''}" data-action="filter" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      ${filtered.length === 0 ? renderEmpty('No tasks in this category right now.', 'Try a different category or check back soon.', I.briefcase) : filtered.map(taskCard).join('')}`;
+  }
+
+  function taskCard(t){
+    const poster = user(t.requesterId);
+    const priceHTML = t.priceType === 'fixed' ? `<span class="price-tag">$${t.price}</span>` : `<span class="price-tag offer">Best offer</span>`;
+    return `
+      <div class="card" data-action="open-task" data-id="${t.id}">
+        <div class="card-top">
+          <div style="flex:1; min-width:0;">
+            <div class="card-title">${esc(t.title)}</div>
+            <div class="card-meta" style="margin-top:6px;">
+              <span class="cat-tag">${esc(t.category)}</span>
+              <span class="meta-icon">${I.pin}${t.distance} mi</span>
+              <span class="meta-icon">${I.clock}${formatRel(t.createdAt)}</span>
+            </div>
+          </div>
+          ${priceHTML}
+        </div>
+        <div class="card-foot">
+          <div class="poster">${avatarHTML(poster)}
+            <div style="min-width:0;">
+              <div class="poster-name">${esc(poster.name)}</div>
+              <div class="poster-rating">${poster.ratingCount ? starRow(avgRating(poster)) + ' ' + avgRating(poster).toFixed(1) : 'New user'}</div>
+            </div>
+          </div>
+          ${t.status !== 'open' ? `<span class="status ${statusCls(t.status)}">${statusLabel(t.status)}</span>` : badgeHTML(poster)}
+        </div>
+      </div>`;
+  }
+
+  function renderPost(){
+    const d = renderPost._draft || (renderPost._draft = { priceType:'fixed', agreed:false, category:'Errands & Delivery' });
+    return `
+      <div class="section-title">Post a task</div>
+      <div class="section-sub">Get help in under a minute.</div>
+      <div class="field"><label class="label">What do you need done?</label><input class="input" id="f-title" value="${esc(d.title||'')}" placeholder="e.g. Help move a dresser up one flight" /></div>
+      <div class="field"><label class="label">Category</label><select class="select" id="f-category">${CATEGORIES.map(c => `<option${c===d.category?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field"><label class="label">Details</label><textarea class="textarea" id="f-desc" placeholder="Include anything a helper should know — timing, access info, what to bring.">${esc(d.description||'')}</textarea></div>
+      <div class="field"><label class="label">Location</label><input class="input" id="f-loc" value="${esc(d.location||'Mission District, SF')}" placeholder="Neighborhood or address" /><div class="help">Auto-detected from your device. Edit if needed.</div></div>
+      <div class="field">
+        <label class="label">Pricing</label>
+        <div class="seg">
+          <button data-action="price-type" data-type="fixed" class="${d.priceType==='fixed'?'active':''}">Fixed price</button>
+          <button data-action="price-type" data-type="offer" class="${d.priceType==='offer'?'active':''}">Best offer</button>
+        </div>
+        ${d.priceType==='fixed' ? `
+          <div style="margin-top:10px;"><input class="input" id="f-price" type="number" min="5" value="${d.price||''}" placeholder="$ amount" /><div class="help">Helpers see this as the offered rate. You can raise it later if no one accepts.</div></div>
+          ${d.price && +d.price > 0 ? `<div class="fee-box"><div class="fee-row"><span>Task price</span><span>$${(+d.price).toFixed(2)}</span></div><div class="fee-row"><span>Platform fee (10%)</span><span>$${platformFee(+d.price).toFixed(2)}</span></div><div class="fee-row total"><span>Helper receives</span><span>$${helperPayout(+d.price).toFixed(2)}</span></div></div>` : ''}
+        ` : `<div style="margin-top:10px;" class="alert-banner info">${I.shield}<div>Helpers will propose prices. You pick the one you like.</div></div>`}
+      </div>
+      <label class="check-box" for="f-liab">
+        <input type="checkbox" id="f-liab" ${d.agreed?'checked':''} />
+        <div class="text"><strong>Liability:</strong> I understand CrownDash is a marketplace platform only and is <strong>not responsible</strong> for any loss, theft, damage, injury, disputes, or outcomes resulting from this job. All transactions are between users.</div>
+      </label>
+      <button class="btn btn-primary" data-action="submit-post">Post task</button>`;
+  }
+
+  function renderMyJobs(){
+    const uid = state.currentUserId;
+    const posted = state.tasks.filter(t => t.requesterId === uid && t.status !== 'closed');
+    const accepted = state.tasks.filter(t => t.helperId === uid && t.status !== 'closed');
+    const history = state.tasks.filter(t => t.status === 'closed' && (t.requesterId === uid || t.helperId === uid));
+    const tab = state.myJobsTab;
+    const list = tab==='posted'?posted:tab==='accepted'?accepted:history;
+    return `
+      <div class="section-title">My jobs</div>
+      <div class="tabs">
+        <button class="${tab==='posted'?'active':''}" data-action="jobs-tab" data-tab="posted">Posted ${posted.length?`(${posted.length})`:''}</button>
+        <button class="${tab==='accepted'?'active':''}" data-action="jobs-tab" data-tab="accepted">Accepted ${accepted.length?`(${accepted.length})`:''}</button>
+        <button class="${tab==='history'?'active':''}" data-action="jobs-tab" data-tab="history">History</button>
+      </div>
+      ${list.length===0 ? renderEmpty(tab==='posted'?'No posted tasks yet.' : tab==='accepted'?'No accepted jobs yet.' : 'No completed jobs.', tab==='posted'?'Tap the + button to post one.' : tab==='accepted'?'Browse the feed to find a job.' : '', I.briefcase) : list.map(taskCard).join('')}`;
+  }
+
+  function renderInbox(){
+    const uid = state.currentUserId;
+    const threads = state.tasks.filter(t => (t.requesterId === uid || t.helperId === uid) && ['accepted','in_progress','awaiting_confirmation','completed_both'].includes(t.status) && t.helperId);
+    threads.sort((a,b)=>{ const la = a.messages.length ? a.messages[a.messages.length-1].at : a.createdAt; const lb = b.messages.length ? b.messages[b.messages.length-1].at : b.createdAt; return lb - la; });
+    return `
+      <div class="section-title">Messages</div>
+      <div class="section-sub">Chat unlocks after a task is accepted.</div>
+      ${threads.length===0 ? renderEmpty('No active conversations.', 'They\'ll appear here once a task is accepted.', I.chat) : threads.map(t => {
+        const otherId = t.requesterId === uid ? t.helperId : t.requesterId;
+        const other = user(otherId);
+        const last = t.messages.length ? t.messages[t.messages.length-1] : null;
+        const preview = last ? (last.fromId===uid ? 'You: ':'') + last.text : 'No messages yet';
+        return `<div class="inbox-item" data-action="open-task" data-id="${t.id}">${avatarHTML(other, 'md')}<div class="inbox-body"><div class="inbox-name">${esc(other.name)} <span style="color:#9ca3af;font-weight:400;font-size:12px;">· ${esc(t.title.slice(0,28))}${t.title.length>28?'…':''}</span></div><div class="inbox-preview">${esc(preview)}</div></div>${last ? `<div class="inbox-time">${formatRel(last.at)}</div>` : ''}</div>`;
+      }).join('')}`;
+  }
+
+  function renderProfile(){
+    const uid = state.profileUserId || state.currentUserId;
+    const u = user(uid);
+    const isSelf = uid === state.currentUserId;
+    const avg = avgRating(u);
+    return `
+      ${!isSelf ? `<button class="back-btn" data-action="back-profile">${I.back} Back</button>` : ''}
+      <div class="profile-header">
+        <div style="display:flex; justify-content:center;">${avatarHTML(u, 'lg')}</div>
+        <div class="profile-name">${esc(u.name)}</div>
+        <div style="margin:6px 0 0;">${badgeHTML(u, 'lg')}</div>
+        <div class="profile-joined">Joined ${esc(u.joined)}${u.verified?' · Verified':''}</div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat"><div class="big">${u.ratingCount ? avg.toFixed(1) : '—'}</div><div class="lab">Rating</div></div>
+        <div class="stat"><div class="big">${u.jobsCompleted}</div><div class="lab">Jobs done</div></div>
+        <div class="stat"><div class="big">${u.ratingCount}</div><div class="lab">Reviews</div></div>
+      </div>
+      ${u.bio ? `<div class="desc-text" style="border:0; padding:0 0 14px;">${esc(u.bio)}</div>` : ''}
+      <div class="subhead" style="margin-top:4px;">Skills</div>
+      <div class="tag-grid">${u.categories.map(c => `<span class="tag-chip">${esc(c)}</span>`).join('')}</div>
+      <div class="subhead">Reviews (${u.reviewsReceived.length})</div>
+      ${u.reviewsReceived.length === 0 ? `<div class="info-line">No reviews yet.</div>` : u.reviewsReceived.map(r => `
+        <div class="review-card">
+          <div class="review-top"><div class="review-name">${esc(r.fromName)} <span style="color:#9ca3af;font-weight:400;font-size:11px;">· as ${esc(r.role)}</span></div><div class="review-date">${formatRel(r.at)}</div></div>
+          ${starRowMd(r.rating)}
+          ${r.tags && r.tags.length ? `<div class="review-tags">${r.tags.map(x => `<span class="review-tag">${esc(x)}</span>`).join('')}</div>` : ''}
+          ${r.text ? `<div class="review-text">${esc(r.text)}</div>` : ''}
+        </div>`).join('')}
+      ${isSelf ? `<hr class="soft"><div class="info-line">🛡️ <strong>Safety:</strong> Report or block any user from their profile or task chat. Admin moderation reviews flagged disputes within 24 hours.</div>` : `<hr class="soft"><button class="btn btn-danger btn-sm" data-action="report-user" data-uid="${u.id}">${I.flag} Report user</button>`}`;
+  }
+
+  function renderDetail(t){
+    if (!t) return `<div class="empty"><div class="em-title">Task not found.</div></div>`;
+    const isRequester = t.requesterId === state.currentUserId;
+    const isHelper = t.helperId === state.currentUserId;
+    const poster = user(t.requesterId);
+    const helper = t.helperId ? user(t.helperId) : null;
+    const otherParty = isRequester ? helper : poster;
+    const priceHTML = t.priceType === 'fixed' ? `$${t.price}` : (t.offers && t.offers.length ? `Best offer · ${t.offers.length} bid${t.offers.length>1?'s':''}` : `Best offer`);
+
+    let actions = '', chat = '', reviewBlock = '';
+
+    if (t.status === 'open') {
+      if (isRequester) {
+        actions = `<div class="info-line">Waiting for a helper. Share the link or raise the price to get faster matches.</div><button class="btn btn-outline" data-action="raise-price" data-id="${t.id}">Raise price</button>`;
+        if (t.priceType === 'offer' && t.offers.length) {
+          actions = `<div class="subhead" style="margin-top:0;">Offers (${t.offers.length})</div>${t.offers.map(o => { const h = user(o.helperId); return `<div class="offer-card"><div class="offer-who">${avatarHTML(h)}<div><div style="font-weight:600;">${esc(h.name)}</div><div style="color:#6b7280;font-size:11px;">${avgRating(h).toFixed(1)} ★ · ${h.jobsCompleted} jobs</div></div></div><div style="display:flex; gap:8px; align-items:center;"><div class="offer-amt">$${o.amount}</div><button class="btn btn-primary btn-sm" data-action="accept-offer" data-taskid="${t.id}" data-hid="${o.helperId}" data-amount="${o.amount}">Accept</button></div></div>`; }).join('')}` + actions;
+        }
+      } else {
+        actions = `<label class="check-box" for="accept-liab" style="margin-top:0;"><input type="checkbox" id="accept-liab" /><div class="text"><strong>Liability:</strong> I understand CrownDash is a marketplace platform only and is <strong>not responsible</strong> for any loss, theft, damage, injury, disputes, or outcomes resulting from this job.</div></label><button class="btn btn-primary" data-action="accept-task" data-id="${t.id}">Accept this task</button>${t.priceType==='offer' ? `<button class="btn btn-outline" data-action="make-offer" data-id="${t.id}" style="margin-top:8px;">Make an offer</button>` : ''}`;
+      }
+    } else if (t.status === 'accepted') {
+      if (isHelper) actions = `<button class="btn btn-primary" data-action="start-task" data-id="${t.id}">Start job</button>`;
+      else if (isRequester) actions = `<div class="alert-banner success">${I.check}<div><strong>${esc(helper.name.split(' ')[0])}</strong> accepted. Chat is unlocked below.</div></div>`;
+    } else if (t.status === 'in_progress') {
+      actions = `<div class="alert-banner info">${I.clock}<div>Job in progress. Once done, both sides mark it complete.</div></div><button class="btn btn-primary" data-action="confirm-complete" data-id="${t.id}">Mark complete</button>`;
+    } else if (t.status === 'awaiting_confirmation') {
+      const youDid = (isRequester && t.requesterConfirmed) || (isHelper && t.helperConfirmed);
+      if (youDid) actions = `<div class="alert-banner info">${I.clock}<div>You marked this complete. Waiting on ${esc(otherParty ? otherParty.name.split(' ')[0] : 'the other side')} to confirm before reviews unlock.</div></div>`;
+      else actions = `<div class="alert-banner">${I.clock}<div>${esc((otherParty||{}).name || 'The other party')} marked this complete. Confirm when you're ready so reviews can unlock.</div></div><button class="btn btn-primary" data-action="confirm-complete" data-id="${t.id}">Confirm complete</button>`;
+    } else if (t.status === 'completed_both') {
+      const myReview = isRequester ? t.requesterReview : t.helperReview;
+      if (myReview) actions = `<div class="alert-banner success">${I.check}<div>You've left your review. Waiting on the other side.</div></div>`;
+      else actions = `<div class="alert-banner success">${I.check}<div>Both sides confirmed. Leave a review to wrap up.</div></div><button class="btn btn-primary" data-action="open-review" data-id="${t.id}">Leave review</button>`;
+    } else if (t.status === 'closed') {
+      actions = `<div class="alert-banner">${I.check}<div>Job closed. Both reviews submitted.</div></div>`;
+    }
+
+    const chatUnlocked = t.helperId && (isRequester || isHelper) && t.status !== 'closed';
+    if (chatUnlocked) {
+      chat = `<div class="subhead">Chat with ${esc((otherParty||{}).name || 'them')}</div>
+        <div class="chat" id="chatbox">${t.messages.length===0 ? `<div style="text-align:center; color:#9ca3af; font-size:13px; padding:20px 0;">No messages yet — say hi 👋</div>` : t.messages.map(m => { const mine = m.fromId === state.currentUserId; const cls = mine ? 'me' : 'them'; const extraCls = m.type === 'location' ? 'loc' : ''; const body = m.type === 'location' ? `${I.locShare} ${esc(m.text)}` : m.type === 'image' ? `${I.image} ${esc(m.text)}` : esc(m.text); return `<div class="msg-wrap ${cls}"><div class="msg ${cls} ${extraCls}">${body}</div><div class="msg-meta">${formatRel(m.at)}</div></div>`; }).join('')}</div>
+        <div class="chat-actions"><button class="chat-action-btn" data-action="send-location" data-id="${t.id}">${I.locShare} Location</button><button class="chat-action-btn" data-action="send-image" data-id="${t.id}">${I.image} Image</button></div>
+        <div class="chat-input"><input id="chat-text" placeholder="Type a message…" /><button class="send-btn" data-action="send-msg" data-id="${t.id}">${I.send}</button></div>`;
+    } else if (!t.helperId && t.status === 'open' && !isRequester) {
+      chat = `<div class="info-line">💬 Chat unlocks after you accept this task.</div>`;
+    }
+
+    if (t.requesterReview || t.helperReview) {
+      reviewBlock = `<div class="subhead">Reviews</div>
+        ${t.requesterReview ? `<div class="review-card"><div class="review-top"><div class="review-name">${esc(user(t.requesterReview.fromId).name)} <span style="color:#9ca3af;font-weight:400;font-size:11px;">· client</span></div><div class="review-date">${formatRel(t.requesterReview.at)}</div></div>${starRowMd(t.requesterReview.rating)}<div class="review-tags">${t.requesterReview.tags.map(x=>`<span class="review-tag">${esc(x)}</span>`).join('')}${t.requesterReview.wouldAgain?'<span class="review-tag" style="background:#d1fae5;color:#065f46;">Would hire again</span>':''}</div>${t.requesterReview.text ? `<div class="review-text">${esc(t.requesterReview.text)}</div>` : ''}</div>` : ''}
+        ${t.helperReview ? `<div class="review-card"><div class="review-top"><div class="review-name">${esc(user(t.helperReview.fromId).name)} <span style="color:#9ca3af;font-weight:400;font-size:11px;">· helper</span></div><div class="review-date">${formatRel(t.helperReview.at)}</div></div>${starRowMd(t.helperReview.rating)}<div class="review-tags">${t.helperReview.tags.map(x=>`<span class="review-tag">${esc(x)}</span>`).join('')}${t.helperReview.wouldAgain?'<span class="review-tag" style="background:#d1fae5;color:#065f46;">Would work again</span>':''}</div>${t.helperReview.text ? `<div class="review-text">${esc(t.helperReview.text)}</div>` : ''}</div>` : ''}`;
+    }
+
+    return `<button class="back-btn" data-action="back">${I.back} Back</button>
+      <div class="detail-hero">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-top:4px;"><span class="cat-tag">${esc(t.category)}</span><span class="status ${statusCls(t.status)}">${statusLabel(t.status)}</span></div>
+        <div class="detail-title">${esc(t.title)}</div>
+        <div class="detail-meta"><span class="meta-icon">${I.pin}${esc(t.location)} · ${t.distance} mi</span><span class="meta-icon">${I.clock}${formatRel(t.createdAt)}</span></div>
+        <div style="font-size:28px; font-weight:800; letter-spacing:-0.03em; color:#065f46;">${priceHTML}</div>
+        ${t.priceType==='fixed' && t.price ? `<div class="fee-box"><div class="fee-row"><span>Task price</span><span>$${t.price.toFixed(2)}</span></div><div class="fee-row"><span>Platform fee (10%)</span><span>$${platformFee(t.price).toFixed(2)}</span></div><div class="fee-row total"><span>Helper receives</span><span>$${helperPayout(t.price).toFixed(2)}</span></div></div>` : ''}
+      </div>
+      <div class="desc-text">${esc(t.description)}</div>
+      <div class="stat-row" data-action="open-profile" data-uid="${poster.id}" style="cursor:pointer;"><div class="poster">${avatarHTML(poster, 'md')}<div><div style="font-weight:600;">${esc(poster.name)} <span style="color:#9ca3af;font-size:12px;font-weight:400;">· client</span></div><div style="color:#6b7280;font-size:12px;">${poster.ratingCount?`${avgRating(poster).toFixed(1)} ★ · ${poster.jobsCompleted} jobs`:'New member'}</div></div></div>${badgeHTML(poster)}</div>
+      ${helper ? `<div class="stat-row" data-action="open-profile" data-uid="${helper.id}" style="cursor:pointer;"><div class="poster">${avatarHTML(helper, 'md')}<div><div style="font-weight:600;">${esc(helper.name)} <span style="color:#9ca3af;font-size:12px;font-weight:400;">· helper</span></div><div style="color:#6b7280;font-size:12px;">${helper.ratingCount?`${avgRating(helper).toFixed(1)} ★ · ${helper.jobsCompleted} jobs`:'New member'}</div></div></div>${badgeHTML(helper)}</div>` : ''}
+      <div style="margin-top:18px;">${actions}</div>
+      ${chat}
+      ${reviewBlock}
+      ${!isRequester && !isHelper ? '' : `<hr class="soft"><button class="btn btn-danger btn-sm" data-action="report-task" data-id="${t.id}">${I.flag} Report this task</button>`}`;
+  }
+
+  function renderEmpty(title, sub, icon){ return `<div class="empty">${icon || I.briefcase}<div class="em-title">${esc(title)}</div><div class="em-sub">${esc(sub)}</div></div>`; }
+
+  function renderNav(){
+    const uid = state.currentUserId;
+    const inboxAlert = state.tasks.some(t => (t.requesterId===uid || t.helperId===uid) && t.messages.length && t.messages[t.messages.length-1].fromId !== uid && ['accepted','in_progress','awaiting_confirmation','completed_both'].includes(t.status));
+    const jobsAlert = hasAlerts();
+    const btn = (key, icon, label, alert) => `<button class="${state.screen===key?'active':''}" data-action="nav" data-screen="${key}">${icon}<span>${label}</span>${alert?'<span class="dot-alert"></span>':''}</button>`;
+    return `<div class="nav">${btn('browse', I.home, 'Browse', false)}${btn('jobs', I.briefcase, 'My Jobs', jobsAlert)}<button class="post-fab" data-action="nav" data-screen="post">${I.plus}<span>Post</span></button>${btn('inbox', I.inbox, 'Inbox', inboxAlert)}${btn('profile', I.user, 'Profile', false)}</div>`;
+  }
+
+  function renderModal(){
+    if (!state.modal) return '';
+    if (state.modal.type === 'review') return renderReviewModal();
+    if (state.modal.type === 'raisePrice') return renderRaisePriceModal();
+    if (state.modal.type === 'notif') return renderNotifModal();
+    return '';
+  }
+
+  function renderReviewModal(){
+    const t = task(state.modal.taskId); if (!t) return '';
+    const isRequester = t.requesterId === state.currentUserId;
+    const target = user(isRequester ? t.helperId : t.requesterId);
+    const tags = isRequester ? HELPER_TAGS : CLIENT_TAGS;
+    const d = state.modal.draft = state.modal.draft || { rating:0, tags:[], text:'', wouldAgain:null };
+    const actionLabel = isRequester ? 'Would hire again?' : 'Would work again?';
+    return `<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-stop>
+      <div class="modal-title">Review ${esc(target.name)}</div>
+      <div class="modal-sub">${esc(t.title)}</div>
+      <div class="field"><label class="label">Rating</label><div class="stars lg" data-role="stars">${Array.from({length:5},(_,i)=>`<svg data-action="set-stars" data-v="${i+1}" class="star${i<d.rating?' filled':''}" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.77 5.82 21l1.18-6.87-5-4.87 6.91-1z"/></svg>`).join('')}</div></div>
+      <div class="field"><label class="label">Tags</label><div class="tag-grid">${tags.map(tg => `<button class="tag-chip${d.tags.includes(tg)?' selected':''}" data-action="toggle-tag" data-tag="${esc(tg)}">${esc(tg)}</button>`).join('')}</div></div>
+      <div class="field"><label class="label">${actionLabel}</label><div class="bool-switch"><button class="yes${d.wouldAgain===true?' active':''}" data-action="set-would" data-v="yes">Yes</button><button class="no${d.wouldAgain===false?' active':''}" data-action="set-would" data-v="no">No</button></div></div>
+      <div class="field"><label class="label">Comments (optional)</label><textarea class="textarea" id="review-text" placeholder="Share a quick note…">${esc(d.text)}</textarea></div>
+      <button class="btn btn-primary" data-action="submit-review">Submit review</button>
+    </div></div>`;
+  }
+
+  function renderRaisePriceModal(){
+    const t = task(state.modal.taskId); if (!t) return '';
+    const current = t.price || 20;
+    return `<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-stop>
+      <div class="modal-title">Raise price</div>
+      <div class="modal-sub">Currently $${current}. Try bumping it to get faster matches.</div>
+      <div class="field"><label class="label">New price</label><input id="raise-amt" class="input" type="number" min="${current+1}" value="${current+10}" /><div class="help">Helpers near you will be notified about the update.</div></div>
+      <button class="btn btn-primary" data-action="submit-raise" data-id="${t.id}">Update price</button>
+    </div></div>`;
+  }
+
+  function renderNotifModal(){
+    const items = notifications();
+    return `<div class="modal-backdrop" data-action="close-modal"><div class="modal" data-stop>
+      <div class="modal-title">Notifications</div>
+      ${items.length===0 ? `<div class="info-line">You're all caught up.</div>` : items.map(n => `<div class="notif-item" ${n.taskId?`data-action="open-task-from-notif" data-id="${n.taskId}"`:''}><div class="notif-icon">${n.icon}</div><div class="notif-body"><div class="notif-title">${esc(n.text)}</div><div class="notif-time">${esc(n.time)}</div></div></div>`).join('')}
+      <hr class="soft"><div class="info-line">Helpers with higher ratings get priority alerts for new nearby jobs.</div>
+    </div></div>`;
+  }
+
+  function renderToast(){ return state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''; }
+
+  function wire(root){
+    root.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-action]'); if (!el) return;
+      const action = el.dataset.action;
+      if (el.hasAttribute('data-stop')) { e.stopPropagation(); return; }
+      if (action === 'nav') { state.screen = el.dataset.screen; state.selectedTaskId = null; state.profileUserId = null; render(); }
+      else if (action === 'filter') { state.browseFilter = el.dataset.cat; render(); }
+      else if (action === 'open-task') { state.screen = 'detail'; state.selectedTaskId = el.dataset.id; render(); }
+      else if (action === 'back') { state.screen = 'browse'; state.selectedTaskId = null; render(); }
+      else if (action === 'back-profile') { state.profileUserId = null; render(); }
+      else if (action === 'open-profile') { state.profileUserId = el.dataset.uid; state.screen = 'profile'; render(); }
+      else if (action === 'jobs-tab') { state.myJobsTab = el.dataset.tab; render(); }
+      else if (action === 'price-type') { renderPost._draft.priceType = el.dataset.type; captureDraft(); render(); }
+      else if (action === 'submit-post') { submitPostForm(); }
+      else if (action === 'accept-task') { const ok = document.getElementById('accept-liab')?.checked; if (!ok) { toast('Please agree to the liability terms.'); return; } acceptTask(el.dataset.id); }
+      else if (action === 'start-task') { startTask(el.dataset.id); }
+      else if (action === 'confirm-complete') { const t = task(el.dataset.id); const roleKey = t.requesterId === state.currentUserId ? 'requester' : 'helper'; markCompleteBy(el.dataset.id, roleKey); }
+      else if (action === 'open-review') { state.modal = { type:'review', taskId:el.dataset.id, draft:{ rating:0, tags:[], text:'', wouldAgain:null } }; render(); }
+      else if (action === 'close-modal') { state.modal = null; render(); }
+      else if (action === 'set-stars') { state.modal.draft.rating = +el.dataset.v; render(); }
+      else if (action === 'toggle-tag') { const tg = el.dataset.tag; const d = state.modal.draft; d.tags = d.tags.includes(tg) ? d.tags.filter(x=>x!==tg) : [...d.tags, tg]; render(); }
+      else if (action === 'set-would') { state.modal.draft.wouldAgain = el.dataset.v === 'yes'; render(); }
+      else if (action === 'submit-review') { submitReviewForm(); }
+      else if (action === 'send-msg') { const input = document.getElementById('chat-text'); if (input && input.value.trim()) { sendMsg(el.dataset.id, input.value, 'text'); } }
+      else if (action === 'send-location') { sendMsg(el.dataset.id, 'Shared: 2400 Mission St (approx)', 'location'); }
+      else if (action === 'send-image') { sendMsg(el.dataset.id, 'Sent a photo', 'image'); }
+      else if (action === 'raise-price') { state.modal = { type:'raisePrice', taskId:el.dataset.id }; render(); }
+      else if (action === 'submit-raise') { const v = +document.getElementById('raise-amt').value; if (v > 0) raisePrice(el.dataset.id, v); }
+      else if (action === 'accept-offer') { acceptOffer(el.dataset.taskid, el.dataset.hid, +el.dataset.amount); }
+      else if (action === 'make-offer') { toast('Offer flow — stubbed in demo.'); }
+      else if (action === 'report-task' || action === 'report-user') { toast('Reported to moderation. Admin will review within 24h.'); }
+      else if (action === 'toggle-notif') { state.modal = { type:'notif' }; render(); }
+      else if (action === 'open-task-from-notif') { state.modal = null; state.screen='detail'; state.selectedTaskId = el.dataset.id; render(); }
+    });
+
+    const titleEl = document.getElementById('f-title');
+    if (titleEl) { ['f-title','f-desc','f-loc','f-price','f-category','f-liab'].forEach(id => { const el = document.getElementById(id); if (!el) return; el.addEventListener('input', captureDraft); el.addEventListener('change', captureDraft); }); }
+    const chatInput = document.getElementById('chat-text');
+    if (chatInput) { chatInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); const btn = document.querySelector('[data-action="send-msg"]'); if (btn) btn.click(); } }); chatInput.focus(); }
+    const cbox = document.getElementById('chatbox'); if (cbox) cbox.scrollTop = cbox.scrollHeight;
+  }
+
+  function captureDraft(){
+    const d = renderPost._draft; if (!d) return;
+    const t = document.getElementById('f-title'); if (t) d.title = t.value;
+    const ds = document.getElementById('f-desc'); if (ds) d.description = ds.value;
+    const l = document.getElementById('f-loc'); if (l) d.location = l.value;
+    const p = document.getElementById('f-price'); if (p) d.price = p.value;
+    const c = document.getElementById('f-category'); if (c) d.category = c.value;
+    const a = document.getElementById('f-liab'); if (a) d.agreed = a.checked;
+    if (document.activeElement === p) {
+      const feeBox = document.querySelector('.fee-box');
+      if (feeBox && d.price && +d.price > 0) feeBox.innerHTML = `<div class="fee-row"><span>Task price</span><span>$${(+d.price).toFixed(2)}</span></div><div class="fee-row"><span>Platform fee (10%)</span><span>$${platformFee(+d.price).toFixed(2)}</span></div><div class="fee-row total"><span>Helper receives</span><span>$${helperPayout(+d.price).toFixed(2)}</span></div>`;
+    }
+  }
+
+  function submitPostForm(){
+    captureDraft();
+    const d = renderPost._draft;
+    if (!d.title || d.title.trim().length < 3) { toast('Add a task title.'); return; }
+    if (!d.description || d.description.trim().length < 5) { toast('Add some details.'); return; }
+    if (!d.location) { toast('Add a location.'); return; }
+    if (d.priceType === 'fixed' && (!d.price || +d.price < 5)) { toast('Set a price of at least $5.'); return; }
+    if (!d.agreed) { toast('Please agree to the liability terms.'); return; }
+    postTask({ title: d.title.trim(), description: d.description.trim(), category: d.category, location: d.location.trim(), priceType: d.priceType, price: d.priceType==='fixed'?+d.price:null });
+    renderPost._draft = { priceType:'fixed', agreed:false, category:'Errands & Delivery' };
+  }
+
+  function submitReviewForm(){
+    const d = state.modal.draft;
+    if (!d.rating) { toast('Pick a star rating.'); return; }
+    if (d.wouldAgain === null) { toast('Answer the final question.'); return; }
+    const textEl = document.getElementById('review-text'); if (textEl) d.text = textEl.value;
+    const t = task(state.modal.taskId);
+    const roleKey = t.requesterId === state.currentUserId ? 'requester' : 'helper';
+    submitReview(state.modal.taskId, roleKey, { rating:d.rating, tags:d.tags, text:d.text, wouldAgain:d.wouldAgain });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
